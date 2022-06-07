@@ -7,7 +7,9 @@ typedef enum NodeType {
     PLUS,
     MINUS,
     MULT,
-    DIV
+    DIV,
+    LPAREN,
+    RPAREN
 } NodeType;
 
 typedef struct Node {
@@ -16,11 +18,12 @@ typedef struct Node {
     struct Node *left;
     struct Node *right;
 } Node;
-Node *new_leaf(Node **ast, int value, char *s, int *i);
-Node *new_node(NodeType type, int value, Node *left, Node *right);
-Node    *expression(Node **ast, char *s, int *i);
-Node    *term(Node **ast, char *s, int *i);
-Node    *factor(Node **ast, char *s, int *i);
+
+
+Node    *new_node(NodeType type, int value, Node *left, Node *right);
+Node    *expression(void);
+Node    *term(void);
+Node    *factor(void);
 Node    *parser(char *s);
 void    display(Node *ast);
 #endif

@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include "node.h"
-#include "token.h"
-// #include <>
-
+#include "header.h"
 /*
 
 <exp> := <term> { ("+" | "-") <term> }
@@ -18,7 +11,8 @@
 <number> :: positive integer
 */
 
-TokenType tok;
+lexer *token = NULL;
+
 
 Node *new_node(NodeType type, int value, Node *left, Node *right) {
     Node *node = (Node *)malloc(sizeof(Node));
@@ -29,99 +23,92 @@ Node *new_node(NodeType type, int value, Node *left, Node *right) {
     return node;
 }
 
-Node *new_leaf(Node **ast, int value, char *s, int *i)
+Node    *expression(void)
 {
-    Node *node = (Node *)malloc(sizeof(Node));
-    node->type = NUM;
-    node->value = value;
-    node->left = NULL;
-    node->right = NULL;
-    if (*ast == NULL)
-        *ast = node;
+    Node *tree;
+    lexer tok;
+
+    tree = NULL;
+    if (token == NULL)
+        return (tree);
+    tree = term();
+    tok = *token;
+    while (tok.tokenType == PLUS || tok.tokenType == MINUS)
+    {
+        next_token();
+        tree = new_node(tok.tokenType, tok.value, tree, term());
+        tok = *token;
+    }
+    return (tree);
+}
+
+Node    *term(void)
+{
+    Node *tree;
+    lexer tok;
+
+    tree = NULL;
+    tree = factor();
+    tok = *token;
+    while (tok.tokenType == MULT || tok.tokenType == DIV)
+    {
+        next_token();
+        tree = new_node(tok.tokenType, tok.value, tree, factor());
+        tok = *token;
+    }
+    return (tree);
+}
+
+Node    *factor(void)
+{
+    Node *tree;
+    lexer tok;
+
+    tree = NULL;
+    tok = *token;
+    if (token->tokenType == NUM)
+    {
+        tree = new_node(tok.tokenType, tok.value, NULL, NULL);
+        next_token();
+        return (tree);
+    }
+    else if (token->tokenType == LPAREN)
+    {
+        next_token();
+        tree = expression();
+        return (tree);
+    }
     else
     {
-        int count;
-
-        count = (*i);
-        if (s[count--] == '+' || s[count--] == '-')
-            (*ast)->right = node;
-        else
-            (*ast)->left = node;
+        printf("syntax Error");
+        return (NULL);
     }
-    return (*ast);
+    return (tree);
 }
 
-Node    *expression(Node **ast, char *s, int *i)
+void    next_token(void)
 {
-    Node    *tree1;
-
-    *ast = term(ast, s, i);
-    while (s[*i] == '+' || s[*i] == '-')
-    {
-        if (s[*i] == '+')
-        {
-            tok = scan_next_token(s, i);
-            tree1 = term(ast, s, i);
-            *ast = new_node(PLUS, 43, *ast, tree1);
-        }
-        if (s[*i] == '-')
-        {
-            tok = scan_next_token(s, i);
-            tree1 = term(ast, s,i);
-            *ast = new_node(MINUS, 45, *ast, tree1);
-        }
-    }
-    return (*ast);
+    if (token == NULL)
+        return ;
+    token = token->next;
 }
 
-Node    *term(Node **ast, char *s, int *i)
+int     expect(lexer *token)
 {
-    Node *tree1;
-    *ast = factor(ast, s, i);
-    while (s[*i] == '*' || s[*i] == '\\')
+    if (token->tokenType == RPAREN)
     {
-        if (s[*i] == '*')
-        {
-            tok = scan_next_token(s, i);
-            tree1 = factor(ast, s, i);
-            *ast = new_node(MULT, 42, *ast, tree1);
-        }
-        if (s[*i] == '\\')
-        {
-            tok = scan_next_token(s, i);
-            tree1 = factor(ast, s, i);
-            *ast = new_node(DIV, 47, *ast, tree1);
-        }
+        next_token();
+        return (1);
     }
-    return (*ast);
-}
-
-Node    *factor(Node **ast, char *s, int *i)
-{
-    Node *tree1;
-
-    if (s[*i] >= '0' && s[*i] <= '9')
-    {
-        *ast = new_leaf(ast, (s[*i] - '0'), s, i);
-        tok = scan_next_token(s, i);
-    }
-    if (s[*i] == '(')
-    {
-        tok = scan_next_token(s,i);
-        *ast = expression(ast, s, i);
-        if (s[*i] == ')')
-            return (NULL);
-    }
-    return (*ast);
+    return (0);
 }
 
 Node *parser(char *s) {
-    int i;
-
-    i = 0;
+    int i = 0;
     Node *ast;
-    ast = NULL;
-    ast = expression(&ast, s, &i);
+
+    token = lexer_list(s);
+    ast = expression();
     return (ast);
 }
 
@@ -131,11 +118,19 @@ void    display(Node *ast)
         return ;
     display(ast->left);
     display(ast->right);
-    printf("%d\n",ast->value);
+    printf("%c\n",ast->value);
 }
+
 int main() {
     char *exp;
     exp = readline("Enter The expression \n");
     Node *ast = parser(exp);
+    // token = lexer_list(exp);
+    // // next_token();
+    // while (token)
+    // {
+    //     printf("%c\n", token->value);
+    //     token = token->next;
+    // }
     display(ast);
 }
