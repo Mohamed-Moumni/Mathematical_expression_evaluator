@@ -15,6 +15,9 @@ lexer       *lex_add_back(lexer *lex, lexer *new);
 void		next_token(void);
 lexer		*lexer_list(char *exp);
 void		free_token_list(lexer **lex);
-int     expect(lexer *token);
+int         expect(lexer *token);
+int         accept(NodeType tok);
+int         eval(Node *tree);
+int         operation(int a, int b, NodeType oper);
 
 #endif
