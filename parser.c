@@ -11,6 +11,7 @@
 <number> :: positive integer
 */
 
+
 lexer *token = NULL;
 
 
@@ -29,6 +30,8 @@ Node    *expression(void)
     lexer   tok;
 
     tree = NULL;
+    // if (token->tokenType == PLUS || token->tokenType == MINUS)
+    //     next_token();
     tree = term();
     if (token == NULL)
         return (tree);
@@ -40,7 +43,6 @@ Node    *expression(void)
         if (token == NULL)
             return (tree);
     }
-    // printf("expression--------%c-------->\n",token->value);
     return (tree);
 }
 
@@ -50,6 +52,7 @@ Node    *term(void)
     lexer tok;
 
     tree = NULL;
+    
     tree = factor();
     if (token == NULL)
         return (tree);
@@ -61,7 +64,6 @@ Node    *term(void)
         if (token == NULL)
             return (tree);
     }
-    // printf("term--------%c-------->\n",token->value);
     return (tree);
 }
 
@@ -88,7 +90,6 @@ Node    *factor(void)
         printf("Synatxe Error!");
         next_token();
     }
-    // printf("factor--------%c-------->\n",token->value);
     return (tree);
 }
 
@@ -131,7 +132,7 @@ void    display(Node *ast)
         return ;
     display(ast->left);
     display(ast->right);
-    printf("%c\n",ast->value);
+    printf("--------------->:%c\n",ast->value);
 }
 
 

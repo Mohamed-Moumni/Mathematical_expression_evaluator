@@ -21,6 +21,9 @@ lexer   *new_lexer_node(NodeType tokenType, int value)
 }
 
 
+// int is_number()
+
+
 NodeType    get_token_type(char c)
 {
     if (is_digits(c))
